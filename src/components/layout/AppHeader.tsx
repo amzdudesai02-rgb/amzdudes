@@ -1,6 +1,7 @@
-import { Search, Bell, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 interface AppHeaderProps {
   title: string;
@@ -28,10 +29,7 @@ export function AppHeader({ title, subtitle }: AppHeaderProps) {
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive" />
-        </Button>
+        <NotificationCenter />
 
         {/* Add Client */}
         <Button className="gap-2">
