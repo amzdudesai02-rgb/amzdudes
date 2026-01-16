@@ -2,8 +2,9 @@ import { Client } from '@/types';
 import { HealthBadge, HealthIndicator } from './HealthBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, TrendingUp, AlertTriangle, Bell } from 'lucide-react';
+import { MoreHorizontal, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface ClientListProps {
   clients: Client[];
@@ -28,6 +29,8 @@ const clientTypeBadgeStyles: Record<string, string> = {
 };
 
 export function ClientList({ clients, title = 'Clients', showViewAll = true }: ClientListProps) {
+  const navigate = useNavigate();
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -35,6 +38,10 @@ export function ClientList({ clients, title = 'Clients', showViewAll = true }: C
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  const handleClientClick = (clientId: string) => {
+    navigate(`/clients/${clientId}`);
   };
 
   return (
@@ -54,6 +61,7 @@ export function ClientList({ clients, title = 'Clients', showViewAll = true }: C
         {clients.map((client) => (
           <div 
             key={client.id}
+            onClick={() => handleClientClick(client.id)}
             className="flex items-center gap-4 px-6 py-4 hover:bg-muted/50 transition-colors cursor-pointer"
           >
             {/* Health Score */}

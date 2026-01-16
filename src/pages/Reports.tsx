@@ -2,54 +2,20 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   FileText, 
-  Calendar, 
   Download, 
   Send, 
   Clock,
   CheckCircle2,
-  Plus
+  Calendar,
+  Settings
 } from 'lucide-react';
-
-const mockReports = [
-  {
-    id: '1',
-    name: 'Weekly Snapshot - NaturaCare Supplements',
-    type: 'Weekly',
-    client: 'NaturaCare Supplements',
-    status: 'sent',
-    sentDate: '2026-01-10',
-    scheduledDate: null,
-  },
-  {
-    id: '2',
-    name: 'Monthly Business Review - January 2026',
-    type: 'Monthly',
-    client: 'TechGear Pro',
-    status: 'scheduled',
-    sentDate: null,
-    scheduledDate: '2026-02-01',
-  },
-  {
-    id: '3',
-    name: 'Weekly Snapshot - HomeStyle Living',
-    type: 'Weekly',
-    client: 'HomeStyle Living',
-    status: 'draft',
-    sentDate: null,
-    scheduledDate: null,
-  },
-  {
-    id: '4',
-    name: 'Quarterly Strategic Review - Q4 2025',
-    type: 'Quarterly',
-    client: 'Seoul Snacks Co',
-    status: 'sent',
-    sentDate: '2026-01-05',
-    scheduledDate: null,
-  },
-];
+import { ReportGenerator } from '@/components/reports/ReportGenerator';
+import { ScheduleManager } from '@/components/reports/ScheduleManager';
+import { TemplateManager } from '@/components/reports/TemplateManager';
+import { mockReports } from '@/data/mockData';
 
 const Reports = () => {
   return (
@@ -79,64 +45,82 @@ const Reports = () => {
         </Card>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Recent Reports</h2>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Generate Report
-        </Button>
-      </div>
+      <Tabs defaultValue="recent" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="recent" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Recent Reports
+            </TabsTrigger>
+            <TabsTrigger value="scheduled" className="gap-2">
+              <Calendar className="w-4 h-4" />
+              Scheduled
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Templates
+            </TabsTrigger>
+          </TabsList>
+          <ReportGenerator />
+        </div>
 
-      {/* Reports List */}
-      <div className="space-y-4">
-        {mockReports.map((report) => (
-          <Card key={report.id}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-                    <FileText className="w-5 h-5 text-primary" />
+        <TabsContent value="recent" className="space-y-4 mt-0">
+          {mockReports.map((report) => (
+            <Card key={report.id}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                      <FileText className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">{report.name}</p>
+                      <p className="text-sm text-muted-foreground">{report.clientName}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{report.name}</p>
-                    <p className="text-sm text-muted-foreground">{report.client}</p>
+                  
+                  <div className="flex items-center gap-4">
+                    <Badge variant="outline">{report.type.charAt(0).toUpperCase() + report.type.slice(1)}</Badge>
+                    <Badge 
+                      variant={
+                        report.status === 'sent' ? 'default' : 
+                        report.status === 'scheduled' ? 'secondary' : 'outline'
+                      }
+                      className={
+                        report.status === 'sent' ? 'bg-success text-success-foreground' :
+                        report.status === 'scheduled' ? 'bg-primary/10 text-primary' : ''
+                      }
+                    >
+                      {report.status === 'sent' && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                      {report.status === 'scheduled' && <Clock className="w-3 h-3 mr-1" />}
+                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {report.sentDate || report.scheduledDate}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-4">
-                  <Badge variant="outline">{report.type}</Badge>
-                  <Badge 
-                    variant={
-                      report.status === 'sent' ? 'default' : 
-                      report.status === 'scheduled' ? 'secondary' : 'outline'
-                    }
-                    className={
-                      report.status === 'sent' ? 'bg-success text-success-foreground' :
-                      report.status === 'scheduled' ? 'bg-primary/10 text-primary' : ''
-                    }
-                  >
-                    {report.status === 'sent' && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                    {report.status === 'scheduled' && <Clock className="w-3 h-3 mr-1" />}
-                    {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {report.sentDate || report.scheduledDate}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Download className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="scheduled" className="mt-0">
+          <ScheduleManager />
+        </TabsContent>
+
+        <TabsContent value="templates" className="mt-0">
+          <TemplateManager />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 };
