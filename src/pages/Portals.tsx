@@ -202,8 +202,6 @@ const Portals = () => {
                       <Badge variant="secondary" className="text-xs">
                         {config.label}
                       </Badge>
-                      <span>•</span>
-                      <span>${Number(client.mrr).toLocaleString()}/mo</span>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2">

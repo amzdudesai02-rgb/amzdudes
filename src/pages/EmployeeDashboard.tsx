@@ -139,12 +139,10 @@ const EmployeeDashboard = () => {
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total MRR</p>
-                  <p className="text-2xl font-bold">
-                    ${clients.reduce((sum, c) => sum + Number(c.mrr), 0).toLocaleString()}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Active Tasks</p>
+                  <p className="text-2xl font-bold">-</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-success" />
+                <Clock className="w-8 h-8 text-primary" />
               </div>
             </CardContent>
           </Card>
@@ -205,14 +203,11 @@ const EmployeeDashboard = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-sm font-medium">${Number(client.mrr).toLocaleString()}/mo</p>
+                            <div className="flex items-center gap-4">
                               <Badge className={`text-xs ${getHealthColor(client.health_status)}`}>
-                                {client.health_score}
+                                Score: {client.health_score}
                               </Badge>
-                            </div>
-                            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                              <ExternalLink className="w-4 h-4 text-muted-foreground" />
                           </div>
                         </div>
                       </Link>
