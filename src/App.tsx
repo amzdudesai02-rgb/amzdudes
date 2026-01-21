@@ -18,6 +18,8 @@ import Hiring from "./pages/Hiring";
 import FeedbackAnalytics from "./pages/FeedbackAnalytics";
 import ClientPortal from "./pages/ClientPortal";
 import ClientOnboarding from "./pages/ClientOnboarding";
+import EmployeePortal from "./pages/EmployeePortal";
+import SmartClientPortal from "./pages/SmartClientPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
           <Route path="/feedback-analytics" element={<FeedbackAnalytics />} />
           <Route path="/client-portal" element={<ClientPortal />} />
           <Route path="/client-onboarding" element={<ClientOnboarding />} />
+          <Route path="/employee-portal" element={<EmployeePortal />} />
+          <Route path="/smart-portal" element={<SmartClientPortal />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
