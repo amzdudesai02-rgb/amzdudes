@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_documents: {
+        Row: {
+          client_id: string
+          created_at: string
+          doc_type: string
+          id: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          url: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          doc_type: string
+          id?: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          doc_type?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_meetings: {
+        Row: {
+          client_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          meeting_type: string
+          notes: string | null
+          recording_url: string | null
+          scheduled_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          meeting_type?: string
+          notes?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          meeting_type?: string
+          notes?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_meetings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_onboarding: {
         Row: {
           client_id: string
@@ -70,6 +165,233 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      client_plans: {
+        Row: {
+          billing_cycle: string
+          client_id: string
+          created_at: string
+          description: string | null
+          features: string[] | null
+          id: string
+          is_active: boolean
+          plan_name: string
+          price: number
+        }
+        Insert: {
+          billing_cycle?: string
+          client_id: string
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean
+          plan_name: string
+          price: number
+        }
+        Update: {
+          billing_cycle?: string
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean
+          plan_name?: string
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tasks: {
+        Row: {
+          assigned_to: string | null
+          client_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          amazon_connected: boolean
+          amazon_seller_id: string | null
+          assigned_employee_id: string | null
+          assigned_team_lead_id: string | null
+          client_type: string
+          company_name: string
+          contact_name: string
+          created_at: string
+          email: string
+          email_notifications_enabled: boolean
+          health_score: number
+          health_status: string
+          id: string
+          mrr: number
+          package: string
+          updated_at: string
+        }
+        Insert: {
+          amazon_connected?: boolean
+          amazon_seller_id?: string | null
+          assigned_employee_id?: string | null
+          assigned_team_lead_id?: string | null
+          client_type: string
+          company_name: string
+          contact_name: string
+          created_at?: string
+          email: string
+          email_notifications_enabled?: boolean
+          health_score?: number
+          health_status?: string
+          id?: string
+          mrr?: number
+          package?: string
+          updated_at?: string
+        }
+        Update: {
+          amazon_connected?: boolean
+          amazon_seller_id?: string | null
+          assigned_employee_id?: string | null
+          assigned_team_lead_id?: string | null
+          client_type?: string
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          email_notifications_enabled?: boolean
+          health_score?: number
+          health_status?: string
+          id?: string
+          mrr?: number
+          package?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_assigned_team_lead_id_fkey"
+            columns: ["assigned_team_lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_updates: {
+        Row: {
+          ai_suggestion: string | null
+          approved_for_client: boolean
+          category: string
+          client_id: string
+          created_at: string
+          employee_id: string
+          feedback_requested: boolean
+          id: string
+          is_growth_opportunity: boolean
+          update_text: string
+        }
+        Insert: {
+          ai_suggestion?: string | null
+          approved_for_client?: boolean
+          category?: string
+          client_id: string
+          created_at?: string
+          employee_id: string
+          feedback_requested?: boolean
+          id?: string
+          is_growth_opportunity?: boolean
+          update_text: string
+        }
+        Update: {
+          ai_suggestion?: string | null
+          approved_for_client?: boolean
+          category?: string
+          client_id?: string
+          created_at?: string
+          employee_id?: string
+          feedback_requested?: boolean
+          id?: string
+          is_growth_opportunity?: boolean
+          update_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_updates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_updates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dashboard_metrics: {
         Row: {
@@ -139,6 +461,106 @@ export type Database = {
           threshold_value?: number | null
         }
         Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          team_lead_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role?: string
+          team_lead_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          team_lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_team_lead_id_fkey"
+            columns: ["team_lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_leads: {
+        Row: {
+          created_at: string
+          department: string
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          email: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      weekly_summaries: {
+        Row: {
+          client_id: string
+          generated_at: string
+          growth_opportunities: string[] | null
+          highlights: string[] | null
+          id: string
+          summary_text: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          client_id: string
+          generated_at?: string
+          growth_opportunities?: string[] | null
+          highlights?: string[] | null
+          id?: string
+          summary_text: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          client_id?: string
+          generated_at?: string
+          growth_opportunities?: string[] | null
+          highlights?: string[] | null
+          id?: string
+          summary_text?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_summaries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
