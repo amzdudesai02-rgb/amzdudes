@@ -7,12 +7,14 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardMetricsSettings } from '@/components/settings/DashboardMetricsSettings';
+import { AccountManagement } from '@/components/settings/AccountManagement';
 import { 
   User, 
   Building, 
   Bell, 
   Link, 
-  BarChart3
+  BarChart3,
+  KeyRound
 } from 'lucide-react';
 
 const Settings = () => {
@@ -21,8 +23,12 @@ const Settings = () => {
       title="Settings" 
       subtitle="Manage your account and preferences"
     >
-      <Tabs defaultValue="metrics" className="space-y-6">
-        <TabsList>
+      <Tabs defaultValue="accounts" className="space-y-6">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="accounts" className="gap-2">
+            <KeyRound className="w-4 h-4" />
+            Accounts
+          </TabsTrigger>
           <TabsTrigger value="metrics" className="gap-2">
             <BarChart3 className="w-4 h-4" />
             Dashboard Metrics
@@ -44,6 +50,10 @@ const Settings = () => {
             Integrations
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="accounts">
+          <AccountManagement />
+        </TabsContent>
 
         <TabsContent value="metrics">
           <DashboardMetricsSettings />
