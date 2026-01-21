@@ -390,10 +390,6 @@ const WholesalerEmployeePortal = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs text-muted-foreground">Monthly Revenue</p>
-                <p className="text-xl font-bold text-success">${client.mrr.toLocaleString()}</p>
-              </div>
               <div 
                 className={`h-11 w-11 rounded-full flex items-center justify-center font-bold text-primary-foreground ${
                   client.health_score >= 80 ? 'bg-success' :
