@@ -8,6 +8,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Users, 
   Building2, 
@@ -18,7 +36,9 @@ import {
   Key,
   Mail,
   User,
-  RefreshCw
+  RefreshCw,
+  Trash2,
+  KeyRound
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -56,6 +76,23 @@ export function AccountManagement() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Password reset dialog
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetTarget, setResetTarget] = useState<{ 
+    type: 'employee' | 'client'; 
+    record: Employee | Client;
+  } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  // Delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ 
+    type: 'employee' | 'client'; 
+    record: Employee | Client;
+  } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -176,6 +213,94 @@ export function AccountManagement() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!resetTarget || !newPassword) return;
+    
+    try {
+      passwordSchema.parse(newPassword);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast.error(err.errors[0].message);
+        return;
+      }
+    }
+    
+    setResetting(true);
+    
+    try {
+      const authUserId = resetTarget.type === 'employee' 
+        ? (resetTarget.record as Employee).auth_user_id 
+        : (resetTarget.record as Client).auth_user_id;
+      
+      if (!authUserId) {
+        throw new Error('User does not have an account');
+      }
+      
+      const { data, error } = await supabase.functions.invoke('manage-user-account', {
+        body: {
+          action: 'reset_password',
+          user_id: authUserId,
+          new_password: newPassword,
+          user_type: resetTarget.type,
+          record_id: resetTarget.record.id
+        }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      toast.success('Password reset successfully! Share the new password with the user.');
+      setResetDialogOpen(false);
+      setNewPassword('');
+      setResetTarget(null);
+      
+    } catch (err: any) {
+      console.error('Error resetting password:', err);
+      toast.error(err.message || 'Failed to reset password');
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteTarget) return;
+    
+    setDeleting(true);
+    
+    try {
+      const authUserId = deleteTarget.type === 'employee' 
+        ? (deleteTarget.record as Employee).auth_user_id 
+        : (deleteTarget.record as Client).auth_user_id;
+      
+      if (!authUserId) {
+        throw new Error('User does not have an account');
+      }
+      
+      const { data, error } = await supabase.functions.invoke('manage-user-account', {
+        body: {
+          action: 'delete_user',
+          user_id: authUserId,
+          user_type: deleteTarget.type,
+          record_id: deleteTarget.record.id
+        }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      toast.success('Login access revoked successfully');
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      fetchData();
+      
+    } catch (err: any) {
+      console.error('Error deleting account:', err);
+      toast.error(err.message || 'Failed to revoke access');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getUnlinkedRecords = () => {
     if (selectedType === 'employee') {
       return employees.filter(e => !e.auth_user_id);
@@ -183,11 +308,15 @@ export function AccountManagement() {
     return clients.filter(c => !c.auth_user_id);
   };
 
-  const getLinkedRecords = () => {
-    if (selectedType === 'employee') {
-      return employees.filter(e => e.auth_user_id);
-    }
-    return clients.filter(c => c.auth_user_id);
+  const openResetDialog = (type: 'employee' | 'client', record: Employee | Client) => {
+    setResetTarget({ type, record });
+    setNewPassword('');
+    setResetDialogOpen(true);
+  };
+
+  const openDeleteDialog = (type: 'employee' | 'client', record: Employee | Client) => {
+    setDeleteTarget({ type, record });
+    setDeleteDialogOpen(true);
   };
 
   if (loading) {
@@ -325,7 +454,7 @@ export function AccountManagement() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Existing Accounts</CardTitle>
-            <CardDescription>Users with login access</CardDescription>
+            <CardDescription>Manage users with login access</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
             <RefreshCw className="w-4 h-4" />
@@ -369,10 +498,29 @@ export function AccountManagement() {
                         {emp.role}
                       </Badge>
                       {emp.auth_user_id ? (
-                        <Badge className="bg-success/10 text-success border-success/20">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Has Login
-                        </Badge>
+                        <>
+                          <Badge className="bg-success/10 text-success border-success/20">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            Has Login
+                          </Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openResetDialog('employee', emp)}
+                            title="Reset password"
+                          >
+                            <KeyRound className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openDeleteDialog('employee', emp)}
+                            title="Revoke access"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
                       ) : (
                         <Badge variant="secondary">
                           No Login
@@ -412,10 +560,29 @@ export function AccountManagement() {
                         {client.client_type.replace('_', ' ')}
                       </Badge>
                       {client.auth_user_id ? (
-                        <Badge className="bg-success/10 text-success border-success/20">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Has Login
-                        </Badge>
+                        <>
+                          <Badge className="bg-success/10 text-success border-success/20">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            Has Login
+                          </Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openResetDialog('client', client)}
+                            title="Reset password"
+                          >
+                            <KeyRound className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => openDeleteDialog('client', client)}
+                            title="Revoke access"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
                       ) : (
                         <Badge variant="secondary">
                           No Login
@@ -434,6 +601,109 @@ export function AccountManagement() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              {resetTarget && (
+                <>
+                  Set a new password for{' '}
+                  <strong>
+                    {resetTarget.type === 'employee' 
+                      ? (resetTarget.record as Employee).name 
+                      : (resetTarget.record as Client).contact_name}
+                  </strong>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="new-password"
+                  type="text"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setNewPassword(`Reset${Math.random().toString(36).slice(-6)}!`)}
+                  title="Generate random password"
+                >
+                  <Key className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Minimum 6 characters. Share this password securely with the user.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleResetPassword} 
+              disabled={resetting || !newPassword}
+            >
+              {resetting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                'Reset Password'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke Login Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && (
+                <>
+                  This will remove login access for{' '}
+                  <strong>
+                    {deleteTarget.type === 'employee' 
+                      ? (deleteTarget.record as Employee).name 
+                      : (deleteTarget.record as Client).contact_name}
+                  </strong>
+                  . They will no longer be able to sign in. The {deleteTarget.type} record will remain in the system.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Revoking...
+                </>
+              ) : (
+                'Revoke Access'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
