@@ -201,12 +201,13 @@ export function AccountManagement() {
       toast.success('Account created successfully!');
       fetchData();
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating account:', err);
-      if (err.message?.includes('already registered')) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (error.message?.includes('already registered')) {
         setError('This email is already registered. Please use a different email or reset the password.');
       } else {
-        setError(err.message || 'Failed to create account');
+        setError(error.message || 'Failed to create account');
       }
     } finally {
       setCreating(false);
@@ -254,9 +255,10 @@ export function AccountManagement() {
       setNewPassword('');
       setResetTarget(null);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error resetting password:', err);
-      toast.error(err.message || 'Failed to reset password');
+      const error = err instanceof Error ? err : new Error(String(err));
+      toast.error(error.message || 'Failed to reset password');
     } finally {
       setResetting(false);
     }
@@ -293,9 +295,10 @@ export function AccountManagement() {
       setDeleteTarget(null);
       fetchData();
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting account:', err);
-      toast.error(err.message || 'Failed to revoke access');
+      const error = err instanceof Error ? err : new Error(String(err));
+      toast.error(error.message || 'Failed to revoke access');
     } finally {
       setDeleting(false);
     }

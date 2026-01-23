@@ -60,50 +60,38 @@ export function useClients() {
   };
 
   const addClient = async (client: Omit<DBClient, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      const { data, error: insertError } = await supabase
-        .from('clients')
-        .insert([client])
-        .select()
-        .single();
+    const { data, error: insertError } = await supabase
+      .from('clients')
+      .insert([client])
+      .select()
+      .single();
 
-      if (insertError) throw insertError;
-      setClients(prev => [data as DBClient, ...prev]);
-      return data as DBClient;
-    } catch (err) {
-      throw err;
-    }
+    if (insertError) throw insertError;
+    setClients(prev => [data as DBClient, ...prev]);
+    return data as DBClient;
   };
 
   const updateClient = async (id: string, updates: Partial<DBClient>) => {
-    try {
-      const { data, error: updateError } = await supabase
-        .from('clients')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+    const { data, error: updateError } = await supabase
+      .from('clients')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
-      if (updateError) throw updateError;
-      setClients(prev => prev.map(c => c.id === id ? data as DBClient : c));
-      return data as DBClient;
-    } catch (err) {
-      throw err;
-    }
+    if (updateError) throw updateError;
+    setClients(prev => prev.map(c => c.id === id ? data as DBClient : c));
+    return data as DBClient;
   };
 
   const deleteClient = async (id: string) => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', id);
+    const { error: deleteError } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id);
 
-      if (deleteError) throw deleteError;
-      setClients(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      throw err;
-    }
+    if (deleteError) throw deleteError;
+    setClients(prev => prev.filter(c => c.id !== id));
   };
 
   useEffect(() => {
