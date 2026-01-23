@@ -34,11 +34,9 @@ const Activity = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="optimization">Optimization</SelectItem>
-            <SelectItem value="listing">Listing Updates</SelectItem>
-            <SelectItem value="strategy">Strategy</SelectItem>
-            <SelectItem value="alert_response">Alert Response</SelectItem>
-            <SelectItem value="report">Reports</SelectItem>
+            <SelectItem value="wholesaler">Wholesalers</SelectItem>
+            <SelectItem value="brand_owner">Brand Owners</SelectItem>
+            <SelectItem value="3p_seller">3P Sellers</SelectItem>
           </SelectContent>
         </Select>
 
@@ -48,9 +46,12 @@ const Activity = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Team</SelectItem>
-            <SelectItem value="alex">Alex Thompson</SelectItem>
-            <SelectItem value="jordan">Jordan Martinez</SelectItem>
-            <SelectItem value="casey">Casey Williams</SelectItem>
+            <SelectItem value="asad">Asad</SelectItem>
+            <SelectItem value="munaam">Munaam</SelectItem>
+            <SelectItem value="shk">SHK</SelectItem>
+            <SelectItem value="aqib">Aqib</SelectItem>
+            <SelectItem value="osama">Osama</SelectItem>
+            <SelectItem value="junaid">Junaid</SelectItem>
           </SelectContent>
         </Select>
 
