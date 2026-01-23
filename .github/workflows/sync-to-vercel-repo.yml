@@ -33,7 +33,7 @@ jobs:
           git config user.name "$ORIGINAL_AUTHOR"
           git config user.email "$ORIGINAL_EMAIL"
           git add -A
-          git commit -m "Sync from junaid3321/amzdudes [skip vercel]" || echo "No changes to commit"
+          git commit -m "Sync from junaid3321/amzdudes" || echo "No changes to commit"
 
       - name: Add target repository as remote
         run: |
