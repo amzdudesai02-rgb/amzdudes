@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn: employeeSignIn, signUp: employeeSignUp, isAuthenticated: isEmployeeAuth, loading: employeeLoading } = useAuth();
   const { signIn: clientSignIn, isAuthenticated: isClientAuth, loading: clientLoading } = useClientAuth();
   
@@ -26,6 +27,17 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!employeeLoading && !clientLoading) {
+      if (isEmployeeAuth || isClientAuth) {
+        // Redirect to the page they were trying to access, or dashboard
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+        navigate(from, { replace: true });
+      }
+    }
+  }, [isEmployeeAuth, isClientAuth, employeeLoading, clientLoading, navigate, location]);
 
   const validateInputs = (isSignUp: boolean) => {
     try {
@@ -61,7 +73,9 @@ const Login = () => {
           setError(error.message);
         }
       } else {
-        navigate('/');
+        // Redirect to the page they were trying to access, or dashboard
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+        navigate(from, { replace: true });
       }
     } else {
       const { error } = await clientSignIn(email, password);
@@ -72,7 +86,9 @@ const Login = () => {
           setError(error.message);
         }
       } else {
-        navigate('/smart-portal');
+        // Redirect to the page they were trying to access, or smart portal
+        const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/smart-portal';
+        navigate(from, { replace: true });
       }
     }
     

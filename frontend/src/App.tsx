@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
@@ -37,8 +38,23 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/clients" element={<Clients />} />
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/clients" 
+            element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/clients/:id" element={<ClientDetail />} />
           <Route path="/portals" element={<Portals />} />
           <Route path="/alerts" element={<Alerts />} />
@@ -56,7 +72,6 @@ const App = () => (
           <Route path="/employee-portal" element={<EmployeePortal />} />
           <Route path="/smart-portal" element={<SmartClientPortal />} />
           <Route path="/wholesaler-portal" element={<WholesalerEmployeePortal />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/employee-auth" element={<EmployeeAuth />} />
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/client-auth" element={<ClientAuth />} />
