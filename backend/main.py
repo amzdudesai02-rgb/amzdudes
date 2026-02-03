@@ -6,6 +6,7 @@ FastAPI backend for ClientMax Pro application
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 import os
@@ -127,6 +128,17 @@ class ClientResponse(BaseModel):
 async def root():
     """Health check endpoint"""
     return {"status": "healthy", "message": "ClientMax Pro API is running"}
+
+@app.get("/favicon.png")
+@app.get("/favicon.ico")
+async def favicon():
+    """Handle favicon requests - return 204 No Content to prevent 401 errors
+    
+    Favicon should be served by the frontend (Vercel), not the backend.
+    This endpoint prevents browsers from triggering 401 errors when
+    they automatically request favicons from the backend URL.
+    """
+    return Response(status_code=204)
 
 @app.get("/api/health")
 async def health_check():
