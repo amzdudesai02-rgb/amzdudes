@@ -58,85 +58,174 @@ const headersAuth = {
 
 async function createOrUpdateEmployee() {
   console.log('📝 Creating/updating employee record...');
-  const res = await fetch(`${restUrl}/employees`, {
-    method: 'POST',
-    headers: { ...headersAuth, Prefer: 'resolution=merge-duplicates' },
-    body: JSON.stringify({
-      name: CEO_NAME,
-      email: CEO_EMAIL,
-      role: CEO_ROLE,
-    }),
-  });
-  
-  if (!res.ok) {
-    // Try PATCH if POST fails (record might exist)
-    const patchRes = await fetch(
-      `${restUrl}/employees?email=eq.${encodeURIComponent(CEO_EMAIL)}`,
-      {
-        method: 'PATCH',
-        headers: { ...headersAuth, Prefer: 'return=representation' },
-        body: JSON.stringify({
-          name: CEO_NAME,
-          role: CEO_ROLE,
-        }),
+  console.log('   URL:', `${restUrl}/employees`);
+  try {
+    const res = await fetch(`${restUrl}/employees`, {
+      method: 'POST',
+      headers: { ...headersAuth, Prefer: 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        name: CEO_NAME,
+        email: CEO_EMAIL,
+        role: CEO_ROLE,
+      }),
+    });
+    
+    const responseText = await res.text();
+    console.log('   Response status:', res.status, res.statusText);
+    console.log('   Response length:', responseText.length);
+    
+    if (!res.ok) {
+      // Try PATCH if POST fails (record might exist)
+      console.log('   POST failed, trying PATCH...');
+      const patchRes = await fetch(
+        `${restUrl}/employees?email=eq.${encodeURIComponent(CEO_EMAIL)}`,
+        {
+          method: 'PATCH',
+          headers: { ...headersAuth, Prefer: 'return=representation' },
+          body: JSON.stringify({
+            name: CEO_NAME,
+            role: CEO_ROLE,
+          }),
+        }
+      );
+      const patchText = await patchRes.text();
+      console.log('   PATCH status:', patchRes.status, patchRes.statusText);
+      console.log('   PATCH response:', patchText.substring(0, 200));
+      if (!patchRes.ok) {
+        throw new Error(`Failed to create/update employee (${patchRes.status}): ${patchText || patchRes.statusText}`);
       }
-    );
-    if (!patchRes.ok) {
-      const text = await patchRes.text();
-      throw new Error(`Failed to create/update employee: ${text || patchRes.statusText}`);
+      if (!patchText || patchText.trim() === '') {
+        // Empty response might be OK for PATCH with return=minimal
+        // Try to fetch the record to verify
+        const getRes = await fetch(
+          `${restUrl}/employees?email=eq.${encodeURIComponent(CEO_EMAIL)}&select=*`,
+          { headers: headersAuth }
+        );
+        const getText = await getRes.text();
+        if (getRes.ok && getText) {
+          return JSON.parse(getText);
+        }
+        throw new Error('PATCH succeeded but could not retrieve updated record');
+      }
+      try {
+        return JSON.parse(patchText);
+      } catch (e) {
+        throw new Error(`Invalid JSON response from PATCH: ${patchText.substring(0, 200)}`);
+      }
     }
-    return await patchRes.json();
+    
+    if (!responseText || responseText.trim() === '') {
+      // Empty response - try to fetch the created record
+      const getRes = await fetch(
+        `${restUrl}/employees?email=eq.${encodeURIComponent(CEO_EMAIL)}&select=*`,
+        { headers: headersAuth }
+      );
+      const getText = await getRes.text();
+      if (getRes.ok && getText) {
+        return JSON.parse(getText);
+      }
+      throw new Error('POST succeeded but response was empty and could not retrieve created record');
+    }
+    
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      throw new Error(`Invalid JSON response from POST: ${responseText.substring(0, 200)}`);
+    }
+  } catch (e) {
+    if (e.message.includes('fetch failed') || e.message.includes('ERR_NAME_NOT_RESOLVED')) {
+      throw new Error(`Network error: Cannot reach Supabase. Check SUPABASE_URL: ${SUPABASE_URL}`);
+    }
+    throw e;
   }
-  return await res.json();
 }
 
 async function createAuthUser() {
   console.log('👤 Creating auth user...');
-  const res = await fetch(`${authUrl}/admin/users`, {
-    method: 'POST',
-    headers: headersAuth,
-    body: JSON.stringify({
-      email: CEO_EMAIL,
-      password: CEO_PASSWORD,
-      email_confirm: true,
-    }),
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    if (json.msg && (json.msg.includes('already') || json.message?.includes('registered'))) {
-      return { existing: true };
+  try {
+    const res = await fetch(`${authUrl}/admin/users`, {
+      method: 'POST',
+      headers: headersAuth,
+      body: JSON.stringify({
+        email: CEO_EMAIL,
+        password: CEO_PASSWORD,
+        email_confirm: true,
+      }),
+    });
+    
+    const responseText = await res.text();
+    let json;
+    try {
+      json = JSON.parse(responseText);
+    } catch (e) {
+      throw new Error(`Invalid JSON response from auth API (${res.status}): ${responseText.substring(0, 200)}`);
     }
-    throw new Error(json.msg || json.message || res.statusText);
+    
+    if (!res.ok) {
+      if (json.msg && (json.msg.includes('already') || json.message?.includes('registered'))) {
+        return { existing: true };
+      }
+      throw new Error(json.msg || json.message || res.statusText);
+    }
+    const id = json.id ?? json.user?.id;
+    return id ? { id } : { existing: true };
+  } catch (e) {
+    if (e.message.includes('fetch failed') || e.message.includes('ERR_NAME_NOT_RESOLVED')) {
+      throw new Error(`Network error: Cannot reach Supabase Auth. Check SUPABASE_URL: ${SUPABASE_URL}`);
+    }
+    throw e;
   }
-  const id = json.id ?? json.user?.id;
-  return id ? { id } : { existing: true };
 }
 
 async function findAuthUserByEmail() {
-  const res = await fetch(`${authUrl}/admin/users?per_page=1000`, {
-    headers: headersAuth,
-  });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.msg || json.message || res.statusText);
-  const user = (json.users || []).find((x) => x.email === CEO_EMAIL);
-  return user ? user.id : null;
+  try {
+    const res = await fetch(`${authUrl}/admin/users?per_page=1000`, {
+      headers: headersAuth,
+    });
+    const responseText = await res.text();
+    let json;
+    try {
+      json = JSON.parse(responseText);
+    } catch (e) {
+      throw new Error(`Invalid JSON response from auth API (${res.status}): ${responseText.substring(0, 200)}`);
+    }
+    if (!res.ok) throw new Error(json.msg || json.message || res.statusText);
+    const user = (json.users || []).find((x) => x.email === CEO_EMAIL);
+    return user ? user.id : null;
+  } catch (e) {
+    if (e.message.includes('fetch failed') || e.message.includes('ERR_NAME_NOT_RESOLVED')) {
+      throw new Error(`Network error: Cannot reach Supabase Auth. Check SUPABASE_URL: ${SUPABASE_URL}`);
+    }
+    throw e;
+  }
 }
 
 async function linkEmployeeToAuth(employeeId, authUserId) {
   console.log('🔗 Linking employee record to auth user...');
-  const res = await fetch(
-    `${restUrl}/employees?id=eq.${employeeId}`,
-    {
-      method: 'PATCH',
-      headers: { ...headersAuth, Prefer: 'return=representation' },
-      body: JSON.stringify({ auth_user_id: authUserId }),
+  try {
+    const res = await fetch(
+      `${restUrl}/employees?id=eq.${employeeId}`,
+      {
+        method: 'PATCH',
+        headers: { ...headersAuth, Prefer: 'return=representation' },
+        body: JSON.stringify({ auth_user_id: authUserId }),
+      }
+    );
+    const responseText = await res.text();
+    if (!res.ok) {
+      throw new Error(`Failed to link employee (${res.status}): ${responseText || res.statusText}`);
     }
-  );
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to link employee: ${text || res.statusText}`);
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      throw new Error(`Invalid JSON response from PATCH: ${responseText.substring(0, 200)}`);
+    }
+  } catch (e) {
+    if (e.message.includes('fetch failed') || e.message.includes('ERR_NAME_NOT_RESOLVED')) {
+      throw new Error(`Network error: Cannot reach Supabase. Check SUPABASE_URL: ${SUPABASE_URL}`);
+    }
+    throw e;
   }
-  return await res.json();
 }
 
 async function main() {
@@ -188,7 +277,14 @@ async function main() {
     console.error('\n❌ Error:', e.message);
     if (e.cause) console.error('  Cause:', e.cause.message || e.cause);
     if (e.code) console.error('  Code:', e.code);
-    console.error('\nCheck: 1) Internet connection 2) SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in backend/.env');
+    console.error('\nTroubleshooting:');
+    console.error('  1) Check internet connection');
+    console.error('  2) Verify backend/.env exists and contains:');
+    console.error('     SUPABASE_URL=https://your-project.supabase.co');
+    console.error('     SUPABASE_SERVICE_ROLE_KEY=your-service-role-key');
+    console.error('  3) Current SUPABASE_URL:', SUPABASE_URL || '(not set)');
+    console.error('  4) Verify your Supabase project is active (not paused)');
+    console.error('  5) Check that SUPABASE_SERVICE_ROLE_KEY is the service_role key (not anon key)');
     process.exit(1);
   }
 }
