@@ -26,7 +26,7 @@ That inserts/updates an employee with `name = 'Junaid'`, `email = 'junaid@amzdud
 From the **repo root**, using credentials from `backend/.env`:
 
 ```bash
-node --env-file=backend/.env scripts/create-ceo-user.mjs
+node scripts/create-ceo-user.mjs
 ```
 
 Or set env manually:
@@ -36,6 +36,21 @@ SUPABASE_URL=https://your-project.supabase.co SUPABASE_SERVICE_ROLE_KEY=your-ser
 ```
 
 This creates the Supabase Auth user with the temporary password and sets `employees.auth_user_id` for the CEO row.
+
+## Troubleshooting: Fix Employee Record
+
+If you see "Account Setup Issue" error after logging in, run the diagnostic/fix script:
+
+```bash
+node scripts/fix-ceo-employee.mjs
+```
+
+This script will:
+- Check if the auth user exists
+- Check if the employee record exists
+- Create the employee record if missing
+- Link the employee record to the auth user
+- Verify the role is set to "CEO"
 
 ## 3. First login
 
