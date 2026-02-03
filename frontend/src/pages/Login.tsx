@@ -162,18 +162,15 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/50 to-background p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-2 overflow-hidden">
+          <div className="mx-auto mb-4 flex items-center justify-center">
             <img 
               src="/amz-logo.png" 
-              alt="AMZ Dudes Logo" 
-              className="w-full h-full object-contain p-2"
+              alt="amzDUDES Logo" 
+              className="h-20 w-auto object-contain"
             />
           </div>
           <div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              ClientMax Pro
-            </CardTitle>
-            <CardDescription className="mt-2 text-base">
+            <CardDescription className="mt-2 text-base text-muted-foreground">
               Sign in to access your dashboard
             </CardDescription>
           </div>

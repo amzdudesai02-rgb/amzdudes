@@ -65,16 +65,12 @@ export function AppSidebar() {
     <div className="flex flex-col h-full w-64 bg-sidebar gradient-sidebar">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg overflow-hidden">
+        <div className="flex items-center justify-center w-full">
           <img 
             src="/amz-logo.png" 
-            alt="AMZ Dudes Logo" 
-            className="w-full h-full object-contain"
+            alt="amzDUDES Logo" 
+            className="h-10 w-auto object-contain"
           />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-sidebar-foreground">ClientMax</h1>
-          <p className="text-xs text-sidebar-foreground/60">Pro</p>
         </div>
       </div>
 
