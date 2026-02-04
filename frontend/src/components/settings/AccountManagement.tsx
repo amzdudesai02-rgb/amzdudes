@@ -72,7 +72,8 @@ export function AccountManagement() {
   const [loading, setLoading] = useState(true);
 
   // Account Management is restricted to junaid@amzdudes.com only
-  const isAuthorizedCEO = employee?.role === 'CEO' && user?.email === 'junaid@amzdudes.com';
+  const userEmail = user?.email || employee?.email || '';
+  const isAuthorizedCEO = employee?.role === 'CEO' && userEmail === 'junaid@amzdudes.com';
   
   if (!authLoading && !isAuthorizedCEO) {
     return (

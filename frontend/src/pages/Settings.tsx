@@ -47,7 +47,8 @@ const Settings = () => {
   const lastName = nameParts.slice(1).join(' ') || '';
 
   // Settings page is restricted to junaid@amzdudes.com only
-  const isAuthorizedCEO = employee?.role === 'CEO' && employeeUser?.email === 'junaid@amzdudes.com';
+  const userEmail = employeeUser?.email || employee?.email || '';
+  const isAuthorizedCEO = employee?.role === 'CEO' && userEmail === 'junaid@amzdudes.com';
   
   if (!loading && !isAuthorizedCEO) {
     return <Navigate to="/" replace />;
