@@ -26,48 +26,47 @@ import {
 } from 'lucide-react';
 
 const Settings = () => {
-  const { employee, loading, user: employeeUser } = useAuth();
-  const { client } = useClientAuth();
+  try {
+    const { employee, loading, user: employeeUser } = useAuth();
+    const { client } = useClientAuth();
 
-  // Get user info for display
-  const displayName = employee?.name || client?.contact_name || employeeUser?.email?.split('@')[0] || 'User';
-  const displayEmail = employee?.email || client?.email || employeeUser?.email || '';
-  
-  // Generate initials from name
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-  
-  const initials = getInitials(displayName);
-  
-  // Parse name into first and last name
-  const nameParts = displayName.trim().split(/\s+/);
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-
-  // Settings page is restricted to junaid@amzdudes.com only
-  const userEmail = employeeUser?.email || employee?.email || '';
-  const isAuthorizedCEO = employee?.role === 'CEO' && userEmail === 'junaid@amzdudes.com';
-  
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <AppLayout title="Settings" subtitle="Loading...">
-        <div className="flex items-center justify-center py-12">
+    // Settings page is restricted to junaid@amzdudes.com only
+    const userEmail = employeeUser?.email || employee?.email || '';
+    const isAuthorizedCEO = employee?.role === 'CEO' && userEmail === 'junaid@amzdudes.com';
+    
+    // Show loading state while checking auth (don't render AppLayout to avoid errors)
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-      </AppLayout>
-    );
-  }
-  
-  // Redirect non-CEO users immediately
-  if (!isAuthorizedCEO) {
-    return <Navigate to="/" replace />;
-  }
+      );
+    }
+    
+    // Redirect non-CEO users immediately (before rendering any layout)
+    if (!isAuthorizedCEO) {
+      return <Navigate to="/" replace />;
+    }
+
+    // Get user info for display (only if authorized)
+    const displayName = employee?.name || client?.contact_name || employeeUser?.email?.split('@')[0] || 'User';
+    const displayEmail = employee?.email || client?.email || employeeUser?.email || '';
+    
+    // Generate initials from name
+    const getInitials = (name: string) => {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    };
+    
+    const initials = getInitials(displayName);
+    
+    // Parse name into first and last name
+    const nameParts = displayName.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
 
   return (
     <AppLayout 
@@ -259,7 +258,18 @@ const Settings = () => {
         </TabsContent>
       </Tabs>
     </AppLayout>
-  );
+    );
+  } catch (error) {
+    console.error('[Settings] Error rendering Settings page:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-destructive mb-4">An error occurred loading the Settings page.</p>
+          <Navigate to="/" replace />
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Settings;
