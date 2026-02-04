@@ -159,14 +159,15 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/50 to-background p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto mb-4 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 p-4">
+      <div className="w-full max-w-md">
+        {/* Logo Section */}
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-6 flex items-center justify-center">
             <img 
               src={`/logo.png?v=${Date.now()}`}
               alt="amzDUDES Logo" 
-              className="h-20 w-auto object-contain"
+              className="h-24 w-auto object-contain drop-shadow-sm"
               onError={(e) => {
                 // Fallback to amz-logo.png if logo.png fails
                 const target = e.target as HTMLImageElement;
@@ -176,87 +177,95 @@ const Login = () => {
               }}
             />
           </div>
-          <div>
-            <CardDescription className="mt-2 text-base text-muted-foreground">
-              Sign in to access your dashboard
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* User Type Selection */}
-          <div className="mb-6">
-            <Label className="text-sm font-medium mb-3 block">I am a:</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant={userType === 'employee' ? 'default' : 'outline'}
-                className="h-auto py-3 flex flex-col items-center gap-2"
-                onClick={() => {
-                  setUserType('employee');
-                  setError(null);
-                }}
-              >
-                <Users className="w-5 h-5" />
-                <span>Employee</span>
-              </Button>
-              <Button
-                type="button"
-                variant={userType === 'client' ? 'default' : 'outline'}
-                className="h-auto py-3 flex flex-col items-center gap-2"
-                onClick={() => {
-                  setUserType('client');
-                  setError(null);
-                }}
-              >
-                <Building2 className="w-5 h-5" />
-                <span>Client</span>
-              </Button>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome Back</h1>
+          <p className="text-sm text-slate-600">Sign in to access your dashboard</p>
+        </div>
 
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="signin-email">Email</Label>
-              <Input
-                id="signin-email"
-                type="email"
-                placeholder={userType === 'employee' ? 'you@amzdudes.com' : 'you@company.com'}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signin-password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="signin-password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  required
-                  className="pr-10"
-                />
+        <Card className="w-full shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            {/* User Type Selection */}
+            <div className="mb-6">
+              <Label className="text-sm font-semibold mb-4 block text-slate-700">I am a:</Label>
+              <div className="grid grid-cols-2 gap-3">
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword((v) => !v)}
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  variant={userType === 'employee' ? 'default' : 'outline'}
+                  className={`h-auto py-4 flex flex-col items-center gap-2 transition-all ${
+                    userType === 'employee' 
+                      ? 'bg-primary hover:bg-primary/90 shadow-md' 
+                      : 'hover:bg-slate-50 border-slate-200'
+                  }`}
+                  onClick={() => {
+                    setUserType('employee');
+                    setError(null);
+                  }}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  <Users className={`w-5 h-5 ${userType === 'employee' ? 'text-primary-foreground' : 'text-slate-600'}`} />
+                  <span className={`font-medium ${userType === 'employee' ? 'text-primary-foreground' : 'text-slate-700'}`}>Employee</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={userType === 'client' ? 'default' : 'outline'}
+                  className={`h-auto py-4 flex flex-col items-center gap-2 transition-all ${
+                    userType === 'client' 
+                      ? 'bg-primary hover:bg-primary/90 shadow-md' 
+                      : 'hover:bg-slate-50 border-slate-200'
+                  }`}
+                  onClick={() => {
+                    setUserType('client');
+                    setError(null);
+                  }}
+                >
+                  <Building2 className={`w-5 h-5 ${userType === 'client' ? 'text-primary-foreground' : 'text-slate-600'}`} />
+                  <span className={`font-medium ${userType === 'client' ? 'text-primary-foreground' : 'text-slate-700'}`}>Client</span>
                 </Button>
               </div>
             </div>
+
+            <form onSubmit={handleSignIn} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="signin-email" className="text-sm font-semibold text-slate-700">Email</Label>
+                <Input
+                  id="signin-email"
+                  type="email"
+                  placeholder={userType === 'employee' ? 'you@amzdudes.com' : 'you@company.com'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  required
+                  className="h-11 border-slate-200 focus:border-primary focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signin-password" className="text-sm font-semibold text-slate-700">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="signin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="pr-10 h-11 border-slate-200 focus:border-primary focus:ring-primary"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-slate-600"
+                    onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
 
             {error && (
               <Alert variant="destructive">
@@ -274,27 +283,38 @@ const Login = () => {
               </Alert>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading} size="lg">
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </Button>
+              <Button 
+                type="submit" 
+                className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-shadow" 
+                disabled={loading} 
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
 
-            {userType === 'client' && (
-              <p className="text-xs text-muted-foreground text-center mt-4">
-                Your login credentials are provided by your account manager.
-                <br />
-                Contact support if you need access.
-              </p>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+              {userType === 'client' && (
+                <p className="text-xs text-slate-500 text-center mt-4 leading-relaxed">
+                  Your login credentials are provided by your account manager.
+                  <br />
+                  Contact support if you need access.
+                </p>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+        
+        {/* Footer */}
+        <p className="text-center text-xs text-slate-500 mt-6">
+          © 2026 amzDUDES. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 };
