@@ -17,8 +17,10 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { AlertCircle } from 'lucide-react';
 
 type ImportType = 'clients' | 'employees';
 
@@ -29,7 +31,27 @@ interface ParsedRow {
 }
 
 export function DataImport() {
+  const { employee, loading: authLoading, user } = useAuth();
   const [importType, setImportType] = useState<ImportType>('clients');
+  
+  // Data Import is restricted to junaid@amzdudes.com only
+  const userEmail = user?.email || employee?.email || '';
+  const isAuthorizedCEO = employee?.role === 'CEO' && userEmail === 'junaid@amzdudes.com';
+  
+  if (!authLoading && !isAuthorizedCEO) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Access restricted. Only junaid@amzdudes.com can import data.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
