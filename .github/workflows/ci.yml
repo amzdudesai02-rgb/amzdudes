@@ -13,6 +13,7 @@ on:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    continue-on-error: false
 
     strategy:
       matrix:
@@ -29,7 +30,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --prefix frontend
+        run: |
+          echo "Installing dependencies..."
+          cd frontend
+          npm ci || {
+            echo "⚠️ npm ci failed, trying npm install..."
+            npm install
+          }
+          cd ..
 
       - name: Run linter
         run: npm run lint --prefix frontend
@@ -42,7 +50,8 @@ jobs:
       - name: Build project
         run: |
           echo "Building frontend..."
-          npm run build --prefix frontend || {
+          cd frontend
+          npm run build || {
             echo "❌ Build failed. Check the error above."
             exit 1
           }
@@ -52,9 +61,11 @@ jobs:
         run: |
           if [ ! -d "frontend/dist" ] || [ -z "$(ls -A frontend/dist)" ]; then
             echo "❌ Build output directory is empty or missing"
+            ls -la frontend/ || echo "frontend directory listing failed"
             exit 1
           fi
           echo "✅ Build output verified"
+          ls -la frontend/dist/ | head -20
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -62,6 +73,7 @@ jobs:
           name: build-files
           path: frontend/dist/
           retention-days: 7
+        if: success()
 
   deploy:
     name: Deploy to Hostinger
