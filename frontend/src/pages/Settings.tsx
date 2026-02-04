@@ -46,8 +46,10 @@ const Settings = () => {
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
 
-  // Settings page is admin-only (CEO only)
-  if (!loading && (!employee || employee.role !== 'CEO')) {
+  // Settings page is restricted to junaid@amzdudes.com only
+  const isAuthorizedCEO = employee?.role === 'CEO' && employeeUser?.email === 'junaid@amzdudes.com';
+  
+  if (!loading && !isAuthorizedCEO) {
     return <Navigate to="/" replace />;
   }
 

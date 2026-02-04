@@ -318,9 +318,9 @@ export function ReportPDFDocument({ report, client, performanceData, aiContent }
           </View>
         </View>
 
-        {/* Footer */}
+        {/* Footer - Page numbers are handled automatically by react-pdf */}
         <Text style={styles.footer}>
-          ClientMax Pro • Confidential Report • Page 1 of 1
+          amzDUDES • Confidential Report
           {isAIGenerated && ' • Generated with AI'}
         </Text>
       </Page>

@@ -39,6 +39,7 @@ import {
   useClientTasks,
   useClientPlans
 } from '@/hooks/useClientPortalData';
+import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { format, formatDistanceToNow, isPast, isFuture } from 'date-fns';
 import {
   Dialog,
@@ -247,7 +248,7 @@ const SmartClientPortal = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="updates" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="updates" className="gap-2">
               <TrendingUp className="w-4 h-4 hidden sm:block" />
               Updates
@@ -263,6 +264,10 @@ const SmartClientPortal = () => {
             <TabsTrigger value="tasks" className="gap-2">
               <CheckSquare className="w-4 h-4 hidden sm:block" />
               Tasks
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2">
+              <FileText className="w-4 h-4 hidden sm:block" />
+              Reports
             </TabsTrigger>
             <TabsTrigger value="plan" className="gap-2">
               <LayoutDashboard className="w-4 h-4 hidden sm:block" />
@@ -645,6 +650,30 @@ const SmartClientPortal = () => {
                       )}
                     </ScrollArea>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Generate Reports</CardTitle>
+                  <CardDescription>Create professional reports with your performance metrics and insights</CardDescription>
+                </div>
+                <ReportGenerator userType="client" clientId={resolvedClientId} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Click "Generate Report" above to create a comprehensive report based on your account data.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Reports can include AI-powered analysis of your performance, growth opportunities, and strategic recommendations.
+                  </p>
                 </div>
               </CardContent>
             </Card>

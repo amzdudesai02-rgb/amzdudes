@@ -39,12 +39,14 @@ interface DBClient {
 
 interface ReportGeneratorProps {
   onReportGenerated?: (reportId: string) => void;
+  userType?: 'employee' | 'client';
+  clientId?: string; // For client users - their own client ID
 }
 
-export function ReportGenerator({ onReportGenerated }: ReportGeneratorProps) {
+export function ReportGenerator({ onReportGenerated, userType = 'employee', clientId }: ReportGeneratorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<string>('');
+  const [selectedClient, setSelectedClient] = useState<string>(clientId || '');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [reportType, setReportType] = useState<ReportType>('weekly');
   const [emailRecipients, setEmailRecipients] = useState('');
@@ -56,17 +58,32 @@ export function ReportGenerator({ onReportGenerated }: ReportGeneratorProps) {
   const [clients, setClients] = useState<DBClient[]>([]);
   const [useAI, setUseAI] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
+  const isClientUser = userType === 'client';
 
   useEffect(() => {
     const fetchClients = async () => {
-      const { data } = await supabase
-        .from('clients')
-        .select('id, company_name, health_score, mrr, contact_name, email, client_type')
-        .order('company_name');
-      setClients((data || []) as DBClient[]);
+      if (isClientUser && clientId) {
+        // For client users, only fetch their own client record
+        const { data } = await supabase
+          .from('clients')
+          .select('id, company_name, health_score, mrr, contact_name, email, client_type')
+          .eq('id', clientId)
+          .single();
+        if (data) {
+          setClients([data as DBClient]);
+          setSelectedClient(clientId);
+        }
+      } else {
+        // For employees, fetch all clients
+        const { data } = await supabase
+          .from('clients')
+          .select('id, company_name, health_score, mrr, contact_name, email, client_type')
+          .order('company_name');
+        setClients((data || []) as DBClient[]);
+      }
     };
     fetchClients();
-  }, []);
+  }, [isClientUser, clientId]);
 
   const fetchClientDataForAI = async (clientId: string) => {
     // Fetch all relevant client data
@@ -377,10 +394,12 @@ export function ReportGenerator({ onReportGenerated }: ReportGeneratorProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Generate Client Report
+            {isClientUser ? 'Generate Your Report' : 'Generate Client Report'}
           </DialogTitle>
           <DialogDescription>
-            Create a professional report with performance metrics and insights.
+            {isClientUser 
+              ? 'Create a professional report with your performance metrics and insights.'
+              : 'Create a professional report with performance metrics and insights.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -391,27 +410,44 @@ export function ReportGenerator({ onReportGenerated }: ReportGeneratorProps) {
           </TabsList>
 
           <TabsContent value="generate" className="space-y-4 mt-4">
-            {/* Client Selection */}
-            <div className="space-y-2">
-              <Label>Select Client</Label>
-              <Select value={selectedClient} onValueChange={setSelectedClient}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a client..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{client.company_name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {client.health_score}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Client Selection - Only show for employees */}
+            {!isClientUser && (
+              <div className="space-y-2">
+                <Label>Select Client</Label>
+                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a client..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{client.company_name}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {client.health_score}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {/* Client Info Display for Client Users */}
+            {isClientUser && clients.length > 0 && (
+              <div className="space-y-2">
+                <Label>Client</Label>
+                <div className="p-3 rounded-lg border bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{clients[0].company_name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      Health Score: {clients[0].health_score}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* AI Generation Toggle */}
             <Card className="p-4 border-primary/20 bg-primary/5">
@@ -529,22 +565,33 @@ export function ReportGenerator({ onReportGenerated }: ReportGeneratorProps) {
           </TabsContent>
 
           <TabsContent value="schedule" className="space-y-4 mt-4">
-            {/* Client Selection */}
-            <div className="space-y-2">
-              <Label>Select Client</Label>
-              <Select value={selectedClient} onValueChange={setSelectedClient}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a client..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.company_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Client Selection - Only show for employees */}
+            {!isClientUser ? (
+              <div className="space-y-2">
+                <Label>Select Client</Label>
+                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a client..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.company_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              clients.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Client</Label>
+                  <div className="p-3 rounded-lg border bg-muted/50">
+                    <span className="font-medium">{clients[0].company_name}</span>
+                  </div>
+                </div>
+              )
+            )}
 
             {/* Template Selection */}
             <div className="space-y-2">

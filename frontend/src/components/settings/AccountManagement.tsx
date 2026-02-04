@@ -66,20 +66,22 @@ interface Client {
 }
 
 export function AccountManagement() {
-  const { employee, loading: authLoading } = useAuth();
+  const { employee, loading: authLoading, user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Account Management is CEO-only (admin panel)
-  if (!authLoading && (!employee || employee.role !== 'CEO')) {
+  // Account Management is restricted to junaid@amzdudes.com only
+  const isAuthorizedCEO = employee?.role === 'CEO' && user?.email === 'junaid@amzdudes.com';
+  
+  if (!authLoading && !isAuthorizedCEO) {
     return (
       <Card>
         <CardContent className="pt-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Access restricted to CEO. This is an admin-only feature.
+              Access restricted. Only junaid@amzdudes.com can create accounts for employees and clients.
             </AlertDescription>
           </Alert>
         </CardContent>
