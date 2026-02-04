@@ -159,7 +159,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4" style={{ backgroundColor: '#000000' }}>
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
