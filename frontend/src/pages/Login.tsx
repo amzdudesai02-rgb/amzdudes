@@ -165,21 +165,21 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="mx-auto mb-6 flex items-center justify-center">
             <img 
-              src={`/logo.png?t=${new Date().getTime()}&v=7`}
+              src={`/logo.png?t=${new Date().getTime()}&v=8`}
               alt="amzDUDES Logo" 
               className="h-24 w-auto object-contain drop-shadow-lg"
               onError={(e) => {
                 // Fallback to amz-logo.png if logo.png fails
                 const target = e.target as HTMLImageElement;
                 if (!target.src.includes('amz-logo.png')) {
-                  target.src = `/amz-logo.png?t=${new Date().getTime()}&v=7`;
+                  target.src = `/amz-logo.png?t=${new Date().getTime()}&v=8`;
                 }
               }}
             />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-sm text-gray-400">Sign in to access your dashboard</p>
-          {/* Theme: Black - Updated v2 */}
+          {/* Theme: Black - Updated v3 - Cache Fix */}
         </div>
 
         <Card className="w-full shadow-2xl border border-gray-800 bg-gray-900/95 backdrop-blur-sm">
