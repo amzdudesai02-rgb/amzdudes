@@ -258,7 +258,7 @@ const Settings = () => {
         </TabsContent>
       </Tabs>
     </AppLayout>
-    );
+  );
   } catch (error) {
     console.error('[Settings] Error rendering Settings page:', error);
     return (
