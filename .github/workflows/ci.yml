@@ -40,7 +40,21 @@ jobs:
         continue-on-error: true
 
       - name: Build project
-        run: npm run build --prefix frontend
+        run: |
+          echo "Building frontend..."
+          npm run build --prefix frontend || {
+            echo "❌ Build failed. Check the error above."
+            exit 1
+          }
+          echo "✅ Build completed successfully"
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "frontend/dist" ] || [ -z "$(ls -A frontend/dist)" ]; then
+            echo "❌ Build output directory is empty or missing"
+            exit 1
+          fi
+          echo "✅ Build output verified"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -54,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test-and-build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    continue-on-error: true
     
     steps:
       - name: Download build artifacts
@@ -62,8 +77,17 @@ jobs:
           name: build-files
           path: frontend/dist/
 
+      - name: Check FTP secrets
+        run: |
+          if [ -z "${{ secrets.HOSTINGER_FTP_SERVER }}" ] || [ -z "${{ secrets.HOSTINGER_FTP_USERNAME }}" ] || [ -z "${{ secrets.HOSTINGER_FTP_PASSWORD }}" ]; then
+            echo "⚠️ Hostinger FTP secrets not configured. Skipping FTP deployment."
+            echo "This does not affect Vercel deployment."
+            exit 0
+          fi
+
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.5
+        continue-on-error: true
         with:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
@@ -74,4 +98,5 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+        if: ${{ secrets.HOSTINGER_FTP_SERVER != '' && secrets.HOSTINGER_FTP_USERNAME != '' && secrets.HOSTINGER_FTP_PASSWORD != '' }}
 
