@@ -179,6 +179,7 @@ const Login = () => {
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-sm text-gray-400">Sign in to access your dashboard</p>
+          {/* Theme: Black - Updated v2 */}
         </div>
 
         <Card className="w-full shadow-2xl border border-gray-800 bg-gray-900/95 backdrop-blur-sm">
