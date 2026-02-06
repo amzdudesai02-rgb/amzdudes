@@ -29,6 +29,7 @@ import EmployeeDashboard from "./pages/EmployeeDashboard";
 import ClientAuth from "./pages/ClientAuth";
 import Login from "./pages/Login";
 import ChangePassword from "./pages/ChangePassword";
+import TodayWork from "./pages/TodayWork";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -127,6 +128,14 @@ const App = () => (
             element={
               <ProtectedRoute userType="any">
                 <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/today-work"
+            element={
+              <ProtectedRoute userType="employee">
+                <TodayWork />
               </ProtectedRoute>
             }
           />
